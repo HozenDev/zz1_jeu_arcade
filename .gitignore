@@ -1,0 +1,25 @@
+# ignore all files
+/*
+
+# not ignore gitignore
+!/.gitignore
+
+# not ignore readme
+!/readme.org
+
+# not ignore build
+!/build
+/build/*
+!/build/Makefile
+
+# not ignore src
+!/src
+/src/*
+
+# liste des dossiers sources à ne pas ignoré
+!/src/*/
+/src/*/*
+
+# file in src folders
+!/src/*/*.c
+!/src/*/*.h
