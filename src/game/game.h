@@ -19,6 +19,7 @@ struct game_state_s {
 
     float score;
 
+    struct sprite_s * sprites;
 };
 
 typedef struct game_state_s game_state_t;  
@@ -32,7 +33,8 @@ struct game_s {
     TTF_Font * font;
 
     struct background_s * back;
-    struct sprite_s * sprites;
+
+    int nb_sprite;
 
     struct game_state_s state;
 };

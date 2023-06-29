@@ -11,67 +11,59 @@ void animation_free_background(struct background_s * b)
 
 void animation_free_sprite(struct sprite_s * s)
 {
-    int i;
-    
-    for (i = 0; i < s->n_state; ++i)
-    {
-        SDL_DestroyTexture(s->states[i]);
-    }
+    free(s->r);
+    SDL_DestroyTexture(s->t);
 }
 
 void animation_render_sprite(SDL_Renderer * renderer,
                              struct sprite_s * s)
 {
-    sdl_render_image(renderer, s->states[(int) s->current_animation], s->r);
+    sdl_render_image(renderer, s->t, s->r[(int) s->current_animation]);
 }
 
 void animation_update_sprite(struct sprite_s * s, float speed)
 {
     s->current_animation += speed;
-    if ((int) s->current_animation >= s->n_state) s->current_animation = 0.0;
+    if ((int) s->current_animation >= s->n_state) s->current_animation = s->n_state-1;
 }
 
-struct sprite_s * animation_sprite_from_file(SDL_Renderer * renderer, char * rname)
+struct sprite_s animation_spritesheet_from_file(SDL_Renderer * renderer, char * fname, int nb_frame)
 {
-    struct sprite_s * s = NULL;
-    
-    struct dirent *pDirent = NULL;
-    DIR *pDir = NULL;
+    int i;
+    int height, width;
 
-    char buf[MAX_PATH]; /* realpath of files */
-    int i = 0;
+    struct sprite_s * s;
     
-    pDir = opendir (rname);
-    if (pDir == NULL) {
-        zlog(stderr, ERROR, "Cannot open directory '%s'\n", rname);
-        exit(-1);
-    }
-
     s = (struct sprite_s *) malloc(sizeof(struct sprite_s));
-    s->r.x = 0;
-    s->r.y = 0;
     s->current_animation = 0.0;
+    s->n_state = nb_frame;
     
-    while ((pDirent = readdir(pDir)) != NULL) {
-        if (strcmp(pDirent->d_name, ".") != 0 && strcmp(pDirent->d_name, "..") != 0)
-        {
-            strncpy(buf, rname, MAX_PATH);
-            strncat(buf, pDirent->d_name, MAX_PATH-1);
-            zlog(stdout, DEBUG, "'%s'", buf);
+    s->t = sdl_load_image(renderer, fname);
 
-            s->states[i] = sdl_load_image(renderer, buf);
-            i++;
-        }
-    }
+    SDL_QueryTexture(s->t, NULL, NULL, &width, &height);
 
-    s->n_state = i;
-    if (i > 0)
+    zlog(stdout, DEBUG, "%d, %d", width, height);
+    
+    int offset_x = width / nb_frame,                // La largeur d'une vignette de l'image
+    offset_y = height / 1 ;                // La hauteur d'une vignette de l'image
+
+    s->r = (SDL_Rect *) malloc(sizeof(SDL_Rect)*nb_frame);
+    
+    /* construction des différents rectangles autour de chacune des vignettes de la planche */
+    i=0;
+    for (int y = 0; y < height; y += offset_y)
     {
-        SDL_QueryTexture(s->states[0], NULL, NULL, &s->r.w, &s->r.h);
+      for (int x = 0; x < width; x += offset_x)
+      {
+          s->r[i].x = x;
+          s->r[i].y = y;
+          s->r[i].w = offset_x;
+          s->r[i].h = offset_y;
+          i++;
+      }
     }
 
-    closedir (pDir);
-    return s;
+    return *s;
 }
 
 struct background_s * animation_background_from_file(SDL_Renderer * renderer,
@@ -118,5 +110,4 @@ void animation_render_background(SDL_Renderer * renderer,
         SDL_RenderCopy(renderer, b->t, NULL, &destRect);
         r_screen.x += b->r.w;
     }
-
 }

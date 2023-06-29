@@ -34,4 +34,5 @@ void utils_shuffle(int* liste,int taille);
 void utils_initlist0(int * liste,int taille);
 void utils_distance_liste(int * indice,float ** distance,float * dist,int taille);
 void utils_copy_list(int *listsrc,int* listdst,int taille);
+
 #endif

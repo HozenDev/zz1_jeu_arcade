@@ -34,10 +34,11 @@ void game_graphic_update(game_t game)
 {
     /* todo : update graphic */
     char buf[2048];
+    int i;
 
     /* animation_render_background(game.renderer, game.back, game.sw, game.sh); */
-    sdl_scale_rect_image(&game.back->r, game.back->t, game.sh);
     sdl_render_image(game.renderer, game.back->t, game.back->r);
+    
     
     sdl_print_text(game.window, game.renderer, game.font, "JEU DES TAUPES",
                    (SDL_Point) {.x = -1, .y = 50}, colors_available.BLACK);
@@ -47,6 +48,12 @@ void game_graphic_update(game_t game)
     sdl_print_text(game.window, game.renderer, game.font, buf,
                    (SDL_Point) {.x = -1, .y = game.sh-80}, colors_available.BLACK);
 
+    /* sdl_render_image(game.renderer, game.state.sprites[0].t, */
+    /*                  game.state.sprites[0].r[0]); */
+
+    SDL_RenderCopy(game.renderer, game.state.sprites[0].t,
+                   &game.state.sprites[0].r[(int) game.state.sprites[0].current_animation],
+                   &game.state.sprites[0].r[0]);
 }
 
 /**
@@ -61,6 +68,7 @@ void game_state_update(game_state_t * g_state)
       */
     if (g_state->event.button.button == SDL_BUTTON_LEFT) /* click souris gauche */
     {
+        if ()
         /* todo: changement état après click souris gauche */
     }
     else if (g_state->event.button.button == SDL_BUTTON_RIGHT) /* click souris droit */
@@ -118,6 +126,16 @@ int game_initialisation(game_t ** game)
     /* ------ génération objets du jeu --------- */
 
     (*game)->back = animation_background_from_file((*game)->renderer, "../data/background_grass.jpeg");
+    sdl_scale_rect_image(&(*game)->back->r, (*game)->back->t, (*game)->sh);
+
+    (*game)->nb_sprite = 1;
+    
+    (*game)->state.sprites = (struct sprite_s *) malloc(sizeof(struct sprite_s) * (*game)->nb_sprite);
+
+    (*game)->state.sprites[0] = animation_spritesheet_from_file((*game)->renderer, "../data/taupe_spritesheet.png", 4);
+
+    zlog(stdout, DEBUG, "%d %d %d %d", (*game)->state.sprites[0].r[0].x, (*game)->state.sprites[0].r[0].y,
+         (*game)->state.sprites[0].r[0].w, (*game)->state.sprites[0].r[0].h);
 
     return EXIT_SUCCESS;
 }
@@ -154,13 +172,14 @@ int game_loop()
         	}
         	break;
             case SDL_KEYDOWN:
+                
         	break;
             case SDL_MOUSEMOTION:
                 /* update mouse position */
-                SDL_GetMouseState(&game->state.mx, &game->state.my);
+                /* SDL_GetMouseState(&game->state.mx, &game->state.my); */
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                game_state_update(&game->state);
+                /* game_state_update(&game->state); */
         	break;
             case SDL_QUIT:
         	zlog(stdout, INFO, "event->type: SDL_QUIT", NULL);
@@ -168,6 +187,8 @@ int game_loop()
                 break;
             }
         }
+
+        animation_update_sprite(&game->state.sprites[0], 0.2);
 
         game_graphic_update(*game);
 
