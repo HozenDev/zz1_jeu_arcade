@@ -1,4 +1,19 @@
 #include "game.h"
+/**
+ *@brief Test if a point is in a rect
+ *
+ *@param int x, x coordinate of the point 
+ *@param int y,y coordinate of the point
+ *@param rect,the rect
+ */
+SDL_bool kill_mole(int x,int y,SDL_Rect Taupe){
+
+    SDL_bool kill=SDL_FALSE;
+    if(x>Taupe.x && x<Taupe.x+Taupe.w && y>Taupe.y && y<Taupe.y+Taupe.h){
+        kill=SDL_TRUE;
+    } 
+    return(kill);
+}
 
 /**
  * @brief Free a game
@@ -61,7 +76,9 @@ void game_state_update(game_state_t * g_state)
       */
     if (g_state->event.button.button == SDL_BUTTON_LEFT) /* click souris gauche */
     {
-        /* todo: changement état après click souris gauche */
+        if(kill_mole(game->state.mx,game->state.my,game->sprite[0])){
+                game->state->score+=1;
+        }
     }
     else if (g_state->event.button.button == SDL_BUTTON_RIGHT) /* click souris droit */
     {
