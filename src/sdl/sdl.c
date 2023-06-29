@@ -215,18 +215,21 @@ void sdl_draw_circle(SDL_Renderer * renderer, int center_x, int center_y, int ra
  * @param SDL_Texture * img, image to scale
  * @param float window_height, height of the current window
  */
-void sdl_scale_rect_image(SDL_Rect * rect, SDL_Texture * img, float window_height)
+void sdl_scale_rect_image(SDL_Rect * rect, SDL_Texture * img, float wh, float ww, int horizontal)
 {
     float scale_factor;
     (*rect).x = (*rect).y = 0;
     SDL_QueryTexture(img, NULL, NULL, &(*rect).w, &(*rect).h);
 
-    scale_factor = window_height / ((float) (*rect).h);
+    if (horizontal) scale_factor = wh / ((float) (*rect).h);
+    else scale_factor = ww / ((float) (*rect).w);
     zlog(stdout, DEBUG, "scale factor: %g", scale_factor);
 
     zlog(stdout, DEBUG, "img rect w|h before scale: %d %d", (*rect).w, (*rect).h);
     (*rect).h = (*rect).h*scale_factor;
     (*rect).w = (*rect).w*scale_factor;
+    (*rect).y = - (rect->h - wh)/3;
+    (*rect).x = - (rect->w - ww)/3;
     zlog(stdout, DEBUG, "img rect w|h after scale: %d %d", (*rect).w, (*rect).h);
 }
 

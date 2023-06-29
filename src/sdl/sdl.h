@@ -18,7 +18,7 @@ void sdl_draw_rect_coords(SDL_Renderer *, int x, int y, int w, int h);
 void sdl_init_image(void);
 void sdl_render_image(SDL_Renderer *, SDL_Texture *, SDL_Rect);
 SDL_Texture * sdl_load_image(SDL_Renderer *, char * name);
-void sdl_scale_rect_image(SDL_Rect * rect, SDL_Texture * img, float window_height);
+void sdl_scale_rect_image(SDL_Rect * rect, SDL_Texture * img, float wh, float ww, int horizontal);
 
 void sdl_print_text(SDL_Window * window, SDL_Renderer * renderer,
                     TTF_Font * font, char * text, SDL_Point p, SDL_Color color);
