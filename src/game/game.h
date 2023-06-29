@@ -16,6 +16,7 @@ struct game_state_s {
     int running;
 
     SDL_Event event;
+    struct sprite_s * sprites;
 
     float score;
 
@@ -32,7 +33,6 @@ struct game_s {
     TTF_Font * font;
 
     struct background_s * back;
-    struct sprite_s * sprites;
 
     struct game_state_s state;
 };

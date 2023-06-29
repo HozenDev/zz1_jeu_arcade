@@ -76,8 +76,8 @@ void game_state_update(game_state_t * g_state)
       */
     if (g_state->event.button.button == SDL_BUTTON_LEFT) /* click souris gauche */
     {
-        if(kill_mole(game->state.mx,game->state.my,game->sprite[0])){
-                game->state->score+=1;
+        if(kill_mole(g_state->mx,g_state->my,g_state->sprites->r)){
+                g_state->score+=1;
         }
     }
     else if (g_state->event.button.button == SDL_BUTTON_RIGHT) /* click souris droit */
