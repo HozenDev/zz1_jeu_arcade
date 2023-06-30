@@ -109,7 +109,7 @@ void game_graphic_update(game_t game)
         sdl_set_renderer_color(game.renderer, (SDL_Color) {.r=0, .g=0, .b=0, .a=150});
         sdl_draw_rect_coords(game.renderer, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        sdl_print_text(game.window, game.renderer, game.font, "Rejouer",
+        sdl_print_text(game.window, game.renderer, game.font, "Jouer",
                        (SDL_Point) {.x = -1, .y = 200}, colors_available.WHITE);
         sdl_print_text(game.window, game.renderer, game.font, "Quitter",
                        (SDL_Point) {.x = -1, .y = 400}, colors_available.WHITE);
@@ -138,7 +138,7 @@ void game_state_reset(game_state_t * g_state)
     g_state->time = 0.0;
     g_state->delay = GAME_DELAY;
 
-    g_state->time_end_delay = 2000;
+    g_state->time_end_delay = 1000;
     
     new_a = animation_create_animation(4);
 
@@ -212,6 +212,7 @@ int game_initialisation(game_t ** game)
     (*game)->state.mx = 0;
     (*game)->state.my = 0;
     (*game)->state.running = 1;
+    (*game)->state.end = 1;
 
     /* ------ initialisation SDL2 --------- */
     
@@ -267,11 +268,6 @@ int game_initialisation(game_t ** game)
     {
         (*game)->state.sprites[i] = animation_spritesheet_from_file((*game)->renderer, "../data/taupe_spritesheet.png", 4);
     }
-
-    zlog(stdout, DEBUG, "%d %d %d %d", (*game)->state.sprites[0]->r[0].x,
-         (*game)->state.sprites[0]->r[0].y,
-         (*game)->state.sprites[0]->r[0].w,
-         (*game)->state.sprites[0]->r[0].h);
 
     return EXIT_SUCCESS;
 }
