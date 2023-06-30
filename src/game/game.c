@@ -215,7 +215,7 @@ int game_initialisation(game_t ** game)
     zlog(stdout, INFO, "OK '%s'", "SDL is initialized.");
 
     /* création de la fenetre principale */
-    (*game)->window = sdl_create_window("JEU DU VOYAGEUR", (*game)->sw, (*game)->sh);
+    (*game)->window = sdl_create_window("JEU DE LA TAUPE", (*game)->sw, (*game)->sh);
     if (!(*game)->window) exit(-1);
     zlog(stdout, INFO, "OK '%s'", "game_loop: Window is initialized.");
 
