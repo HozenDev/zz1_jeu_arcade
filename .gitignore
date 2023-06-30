@@ -33,7 +33,7 @@
 /data/*
 !/data/*.ttf
 !/data/back_tree.jpg
-!/data/taupe_spritesheet.jpg
+!/data/taupe_spritesheet.png
 
 # not ignore data/img
 !/data/*/
