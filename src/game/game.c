@@ -19,6 +19,10 @@ void game_loop_state_update(game_state_t * g_state)
         }
         free(new_a);
     }
+    if (g_state->end && g_state->time_end_delay > 0)
+    {
+        g_state->time_end_delay -= g_state->delay;
+    }
 }
 
 void game_change_sprites(game_t * game)
@@ -134,6 +138,8 @@ void game_state_reset(game_state_t * g_state)
     g_state->time = 0.0;
     g_state->delay = GAME_DELAY;
 
+    g_state->time_end_delay = 2000;
+    
     new_a = animation_create_animation(4);
 
     for (i = 0; i < g_state->nb_sprite; ++i)
@@ -179,9 +185,12 @@ void game_mouse_state_update(game_state_t * g_state)
         }
     }
     else { /* gestion fin de jeu */
-        if (g_state->my <= (int) SCREEN_HEIGHT/2)
-            game_state_reset(g_state);
-        else g_state->running = 0;
+        if (g_state->time_end_delay <= 0)
+        {
+            if (g_state->my <= (int) SCREEN_HEIGHT/2)
+                game_state_reset(g_state);
+            else g_state->running = 0;
+        }
     }
 }
 
@@ -244,6 +253,7 @@ int game_initialisation(game_t ** game)
 
     (*game)->state.delay = GAME_DELAY;
     (*game)->state.time = 0;
+    (*game)->state.time_end_delay = 1000;
     
     (*game)->back = animation_background_from_file((*game)->renderer, "../data/back_tree.jpg");
     sdl_scale_rect_image(&(*game)->back->r, (*game)->back->t,
@@ -324,8 +334,6 @@ int game_loop()
         SDL_Delay(game->state.delay);
     }
 
-    zlog(stdout, INFO, "Score: %d", game->state.score);
-    
     game_free_game(game);
     
     return 0;

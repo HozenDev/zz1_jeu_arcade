@@ -30,6 +30,8 @@ struct game_state_s {
     float time;
     float delay;
 
+    float time_end_delay;
+    
     SDL_Rect game_rect;
 };
 
