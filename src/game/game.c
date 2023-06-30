@@ -324,6 +324,8 @@ int game_loop()
         SDL_Delay(game->state.delay);
     }
 
+    zlog(stdout, INFO, "Score: %d", game->state.score);
+    
     game_free_game(game);
     
     return 0;
