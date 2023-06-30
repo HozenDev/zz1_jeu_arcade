@@ -160,7 +160,7 @@ void game_mouse_state_update(game_state_t * g_state)
     if (!g_state->end) {
         if (g_state->event.button.button == SDL_BUTTON_LEFT) /* click souris gauche */
         {
-            for (i = 0; i < g_state->nb_sprite; ++i) { 
+            for (i = g_state->nb_sprite-1; i >= 0; --i) { 
                 if (game_kill_mole(g_state->mx, g_state->my, g_state->sprites[i]->d))
                 {
                     g_state->score+=1;

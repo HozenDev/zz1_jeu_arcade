@@ -32,6 +32,8 @@
 !/data
 /data/*
 !/data/*.ttf
+!/data/back_tree.jpg
+!/data/taupe_spritesheet.jpg
 
 # not ignore data/img
 !/data/*/
