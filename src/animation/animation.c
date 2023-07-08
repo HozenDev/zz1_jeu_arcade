@@ -12,7 +12,7 @@ void animation_change_animation(struct sprite_s * s, struct animation_s * a)
     
     s->a->n = a->n;
     s->a->current_animation = a->current_animation;
-    s->a->array = (int *) malloc(sizeof(int));
+    s->a->array = (int *) malloc(sizeof(int)*a->n);
 
     for (i = 0; i < a->n; ++i)
     {
@@ -30,8 +30,11 @@ void animation_free_sprite(struct sprite_s * s)
 {
     if (s)
     {
-        if (s->a && s->a->array) free(s->a->array);
-        if (s->a) free(s->a);
+        if (s->a)
+        {
+            if (s->a->array) free(s->a->array);
+            free(s->a);
+        }
         if (s->r) free(s->r);
         if (s->name) free(s->name);
         if (s->t) SDL_DestroyTexture(s->t);
@@ -97,7 +100,7 @@ struct sprite_s * animation_spritesheet_from_file(SDL_Renderer * renderer, char 
     s = (struct sprite_s *) malloc(sizeof(struct sprite_s));
 
     s->name = (char *) malloc(sizeof(char)*n_fname);
-    strncpy(s->name, fname, n_fname);
+    strncpy(s->name, fname, n_fname-1);
         
     /* chargement de la texture */
     
@@ -135,11 +138,12 @@ struct sprite_s * animation_spritesheet_from_file(SDL_Renderer * renderer, char 
 struct background_s * animation_background_from_file(SDL_Renderer * renderer,
                                                      char * fname)
 {
+    int fname_n = strlen(fname);
     struct background_s * b = NULL;
 
     b = (struct background_s *) malloc(sizeof(struct background_s));
     b->name = (char *) malloc(sizeof(char)*strlen(fname));
-    strcpy(b->name, fname);
+    strncpy(b->name, fname, fname_n-1);
 
     b->t = sdl_load_image(renderer, fname);
 

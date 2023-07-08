@@ -17,6 +17,7 @@ void game_loop_state_update(game_state_t * g_state)
         for (i = 0; i < g_state->nb_sprite; ++i) {
             animation_change_animation(g_state->sprites[i], new_a);
         }
+        free(new_a->array);
         free(new_a);
     }
     if (g_state->end && g_state->time_end_delay > 0)
@@ -61,10 +62,6 @@ void game_free_game(game_t * game)
     
     if (game)
     {
-        /* free window and game renderer */
-        if (game->window) {SDL_DestroyWindow(game->window); game->window = NULL;}
-        if (game->renderer) {SDL_DestroyRenderer(game->renderer); game->renderer = NULL;}
-
         /* clear game attributs */
         game->sw = 0;
         game->sh = 0;
@@ -80,6 +77,13 @@ void game_free_game(game_t * game)
         free(game->state.sprites);
 
         animation_free_background(game->back);
+        free(game->back);
+
+        if (game->font) TTF_CloseFont(game->font);
+
+        /* free window and game renderer */
+        if (game->renderer) {SDL_DestroyRenderer(game->renderer); game->renderer = NULL;}
+        if (game->window) {SDL_DestroyWindow(game->window); game->window = NULL;}
 
         free(game);
     }
@@ -151,6 +155,7 @@ void game_state_reset(game_state_t * g_state)
             = rand()%(g_state->game_rect.h-g_state->game_rect.y) + g_state->game_rect.y;
         animation_change_animation(g_state->sprites[i], new_a);
     }
+    free(new_a->array);
     free(new_a);
 }
 
@@ -213,6 +218,8 @@ int game_initialisation(game_t ** game)
     (*game)->state.my = 0;
     (*game)->state.running = 1;
     (*game)->state.end = 1;
+    (*game)->state.score = 0.0;
+    (*game)->state.time = 0.0;
 
     /* ------ initialisation SDL2 --------- */
     
@@ -259,6 +266,7 @@ int game_initialisation(game_t ** game)
     (*game)->back = animation_background_from_file((*game)->renderer, "../data/back_tree.jpg");
     sdl_scale_rect_image(&(*game)->back->r, (*game)->back->t,
                          (*game)->sh, (*game)->sw, 0);
+    (*game)->back->r.y -= 120;
 
     (*game)->state.nb_sprite = NB_GAME_MOLE;
     
@@ -331,6 +339,8 @@ int game_loop()
     }
 
     game_free_game(game);
+    sdl_quit_text();
+    sdl_quit();
     
     return 0;
 }

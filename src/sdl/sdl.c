@@ -112,21 +112,7 @@ void sdl_render_image(SDL_Renderer * renderer, SDL_Texture * texture, SDL_Rect r
  */
 SDL_Texture * sdl_load_image(SDL_Renderer * renderer, char * name)
 {
-    SDL_Texture * texture;
-    SDL_Surface *image = IMG_Load(name);
-
-    if(!image)
-    {
-	zlog(stderr, WARNING, "IMG_Load: %s", IMG_GetError());
-    }
-    else
-    {
-	zlog(stdout, INFO, "IMG_Load: %s", "Surface has been loaded");
-    }
-
-    texture = SDL_CreateTextureFromSurface(renderer, image);
-    SDL_FreeSurface(image);
-
+    SDL_Texture * texture = IMG_LoadTexture(renderer, name);
     if (!texture)
     {
 	zlog(stderr, WARNING, "SDL_CreateTextureFromSurface: '%s'", "texture can't load");
@@ -135,7 +121,6 @@ SDL_Texture * sdl_load_image(SDL_Renderer * renderer, char * name)
     {
 	zlog(stdout, INFO, "SDL_CreateTextureFromSurface: %s", "Texture has been loaded");
     }
-    
     return texture;
 }
 
@@ -153,6 +138,77 @@ void sdl_draw_rect_coords(SDL_Renderer * renderer, int x, int y, int w, int h)
     /* draw a rectangle with SDL */
     sdl_draw_rect(renderer, (SDL_Rect) {.x = x, .y = y, .w = w, .h = h});
 }
+
+/**
+ * @brief Draw a filled circle
+ *
+ * @param renderer, renderer where the circle will be printed
+ * @param x, x center of the circle
+ * @param y, y center of the circle
+ * @param radius, radius of the circle
+ * @param color, color of the circle
+ */
+void sdl_draw_circle_filled(SDL_Renderer *renderer, int x, int y, int radius)
+{
+    int w, h, dx, dy;
+
+    for (w = 0; w < radius * 2; w++)
+    {
+        for (h = 0; h < radius * 2; h++)
+        {
+            dx = radius - w; // horizontal offset
+            dy = radius - h; // vertical offset
+            if ((dx*dx + dy*dy) <= (radius * radius))
+            {
+                SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+            }
+        }
+    }
+}
+
+void sdl_draw_diamond(SDL_Renderer * renderer, int center_x, int center_y, int radius, SDL_Color c)
+{
+    SDL_Vertex trisup[3] =
+        {
+            {
+                {center_x-radius, center_y},
+                {c.r, c.g, c.b, c.a},
+                {0.f, 0.f}
+            },
+            {
+                {center_x, center_y+radius},
+                {c.r, c.g, c.b, c.a},
+                {0.f, 0.f}
+            },
+            {
+                {center_x+radius, center_y},
+                {c.r, c.g, c.b, c.a},
+                {0.f, 0.f}
+            }
+        };
+    SDL_Vertex triinf[3] =
+        {
+            {
+                {center_x-radius, center_y},
+                {c.r, c.g, c.b, c.a},
+                {0.f, 0.f}
+            },
+            {
+                {center_x, center_y-radius},
+                {c.r, c.g, c.b, c.a},
+                {0.f, 0.f}
+            },
+            {
+                {center_x+radius, center_y},
+                {c.r, c.g, c.b, c.a},
+                {0.f, 0.f}
+            }
+        };
+
+    if( SDL_RenderGeometry(renderer, NULL, trisup, 3, NULL, 0) < 0 ) {SDL_Log("%s\n", SDL_GetError());}
+    if( SDL_RenderGeometry(renderer, NULL, triinf, 3, NULL, 0) < 0 ) {SDL_Log("%s\n", SDL_GetError());}
+}
+
 
 /**
  * @brief Draw a circle based on the middle point circle algorithm
@@ -174,23 +230,19 @@ void sdl_draw_circle(SDL_Renderer * renderer, int center_x, int center_y, int ra
     int dx = 1;
     int dy = 1;
     int error = dx - (radius << 1);
-    int i;
 
     while (x >= y)
     {
 	/* the loop fill every octant of the circle */
-	for (i = 0; i <= x; ++i)
-	{
-	    /* Each of the following renders an octant of the circle */
-	    SDL_RenderDrawPoint(renderer, center_x + i, center_y - y);
-	    SDL_RenderDrawPoint(renderer, center_x + i, center_y + y);
-	    SDL_RenderDrawPoint(renderer, center_x - i, center_y - y);
-	    SDL_RenderDrawPoint(renderer, center_x - i, center_y + y);
-	    SDL_RenderDrawPoint(renderer, center_x + y, center_y - i);
-	    SDL_RenderDrawPoint(renderer, center_x + y, center_y + i);
-	    SDL_RenderDrawPoint(renderer, center_x - y, center_y - i);
-	    SDL_RenderDrawPoint(renderer, center_x - y, center_y + i);
-	}
+        /* Each of the following renders an octant of the circle */
+        SDL_RenderDrawPoint(renderer, center_x + x, center_y - y);
+        SDL_RenderDrawPoint(renderer, center_x + x, center_y + y);
+        SDL_RenderDrawPoint(renderer, center_x - x, center_y - y);
+        SDL_RenderDrawPoint(renderer, center_x - x, center_y + y);
+        SDL_RenderDrawPoint(renderer, center_x + y, center_y - x);
+        SDL_RenderDrawPoint(renderer, center_x + y, center_y + x);
+        SDL_RenderDrawPoint(renderer, center_x - y, center_y - x);
+        SDL_RenderDrawPoint(renderer, center_x - y, center_y + x);
 
 	if (error <= 0)
 	{
@@ -228,8 +280,6 @@ void sdl_scale_rect_image(SDL_Rect * rect, SDL_Texture * img, float wh, float ww
     zlog(stdout, DEBUG, "img rect w|h before scale: %d %d", (*rect).w, (*rect).h);
     (*rect).h = (*rect).h*scale_factor;
     (*rect).w = (*rect).w*scale_factor;
-    (*rect).y = - (rect->h - wh)/3;
-    (*rect).x = - (rect->w - ww)/3;
     zlog(stdout, DEBUG, "img rect w|h after scale: %d %d", (*rect).w, (*rect).h);
 }
 
@@ -287,6 +337,14 @@ void sdl_print_text(SDL_Window * window, SDL_Renderer * renderer,
 }
 
 /**
+ * @brief Quit sdl
+ */
+void sdl_quit(void)
+{
+    SDL_Quit();
+}
+
+/**
  * @brief Quit sdl ttf
  */
 void sdl_quit_text(void)
@@ -320,7 +378,14 @@ void sdl_draw_segment(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 }
 
 
-// appelle pas ta fonction comme celle de la SDL, tu dois lui donner un nom différent
+/**
+ * @brief Set the icon of an SDL window.
+ *
+ * This function loads an image file containing the icon and sets it as the icon for the specified SDL window.
+ *
+ * @param window   The SDL window for which to set the icon.
+ * @param icones   Pointer to the SDL surface that will hold the loaded icon image.
+ */
 void sdl_set_icon(SDL_Window*  window, SDL_Surface ** icones)
 {
     * icones = IMG_Load("data/icones.png");
